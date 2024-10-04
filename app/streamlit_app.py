@@ -6,19 +6,17 @@ import time
 # FastAPI URL
 API_URL = "http://web:8080/student"
 
-# Title for the app
 st.title("Student Record API Tester for OS")
 
-# Input fields for student data
 student_id = st.text_input("Student ID", value="12345")
 student_name = st.text_input("Student Name", value="John Doe")
 course = st.selectbox("Course", ["OS", "Math", "CS", "Physics"])
 present_date = st.date_input("Present Date", value=date.today())
 
-# Function to create a student record via POST request
+# POST request to simulate what's wanted in part 1 requirement doc
 def create_student_record():
     # Add a delay to prevent Docker container issue
-    time.sleep(5)  # Wait for 5 seconds
+    time.sleep(5)  # Wait for 5 seconds just in case to prevent startup issues
     
     student_data = {
         "studentID": student_id,
@@ -27,7 +25,7 @@ def create_student_record():
         "presentDate": present_date.isoformat()
     }
     
-    # Send POST request
+    # POST request for adding a student
     response = requests.post(API_URL, json=student_data)
     
     if response.status_code == 201:
@@ -40,33 +38,47 @@ def create_student_record():
         st.error(f"Error: {response.status_code}")
         st.text(response.text)
 
-# Function to retrieve all students via GET request
+#let's add a get as well so we can see our handy-work
 def get_all_students():
-    time.sleep(5)  # Optional delay to ensure the server is ready
     
-    # Send GET request to retrieve all students
     response = requests.get(API_URL)
     
     if response.status_code == 200:
         students = response.json()
         if len(students) > 0:
             st.success("Fetched students successfully!")
-            st.json(students)  # Display list of students
+            st.json(students)  
         else:
             st.warning("No students found.")
     else:
         st.error(f"Error: {response.status_code}")
         st.text(response.text)
 
-# Button to create a new student record
+# for interacting with the post
 if st.button("Create Student Record"):
     create_student_record()
 
-# Section for retrieving and displaying all students
+# let's add another one to get a specific student by their id
+def get_student_by_id(student_id):
+    response = requests.get(f"{API_URL}/{student_id}")
+    
+    if response.status_code == 200:
+        student = response.json()
+        st.success(f"Student with ID {student_id} found!")
+        st.json(student)
+    else:
+        st.error(f"Error: {response.status_code}")
+        st.text(response.text)
+
+# for interacting with the get
 st.subheader("Retrieve Existing Records")
 if st.button("Get All Students"):
     get_all_students()
 
-# Explanation for testing existing records
-st.subheader("Testing Existing Records")
-st.write("To test the handling of existing records, submit the same student data twice and observe the response.")
+# for interacting with the post to get a specific student
+st.subheader("Retrieve a Student by ID")
+specific_student_id = st.text_input("Enter Student ID to Retrieve")
+if st.button("Get Student by ID"):
+    get_student_by_id(specific_student_id)
+
+st.write("Test to make sure we can't submit multiple of the same.")

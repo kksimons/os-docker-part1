@@ -77,7 +77,7 @@ def read_student(student_id: str, db: SessionLocal = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Student not found")
     return student
 
-# NEW: GET endpoint to retrieve all students
+# add the get point for the streamlit
 @app.get("/student")
 def get_all_students(db: SessionLocal = Depends(get_db)):
     students = db.query(Student).all()
