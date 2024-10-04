@@ -3,6 +3,28 @@ import requests
 from datetime import date
 import time
 
+# some quick css because the red on hover and push is off-putting
+st.markdown(
+    """
+    <style>
+    .success-btn {
+        background-color: #4CAF50;
+        color: white;
+        font-size: 16px;
+        padding: 10px;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+        text-align: center;
+    }
+    .success-btn:hover {
+        background-color: #45a049;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # FastAPI URL
 API_URL = "http://web:8080/student"
 
@@ -55,7 +77,7 @@ def get_all_students():
         st.text(response.text)
 
 # for interacting with the post
-if st.button("Create Student Record"):
+if st.markdown('<button class="success-btn">Create Student Record</button>', unsafe_allow_html=True):
     create_student_record()
 
 # let's add another one to get a specific student by their id
@@ -71,14 +93,14 @@ def get_student_by_id(student_id):
         st.text(response.text)
 
 # for interacting with the get
-st.subheader("Retrieve Existing Records")
-if st.button("Get All Students"):
+st.subheader("Retrieve All Existing Records")
+if st.markdown('<button class="success-btn">Get All Students</button>', unsafe_allow_html=True):
     get_all_students()
 
 # for interacting with the post to get a specific student
-st.subheader("Retrieve a Student by ID")
+st.subheader("Retrieve a single Student by ID")
 specific_student_id = st.text_input("Enter Student ID to Retrieve")
-if st.button("Get Student by ID"):
+if st.markdown('<button class="success-btn">Get Student by ID</button>', unsafe_allow_html=True):
     get_student_by_id(specific_student_id)
 
 st.write("Test to make sure we can't submit multiple of the same.")
