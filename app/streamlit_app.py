@@ -3,11 +3,12 @@ import requests
 from datetime import date
 import time
 
-# some quick css because the red on hover and push is off-putting
+# Custom CSS for button styling, lord help me I don't know how to make the text stay white after click on streamlit
 st.markdown(
     """
     <style>
-    .success-btn {
+    /* Target all buttons */
+    div.stButton > button {
         background-color: #4CAF50;
         color: white;
         font-size: 16px;
@@ -17,8 +18,22 @@ st.markdown(
         border-radius: 4px;
         text-align: center;
     }
-    .success-btn:hover {
+
+    div.stButton > button:hover {
         background-color: #45a049;
+        color: white;
+    }
+
+    div.stButton > button:focus {
+        background-color: #45a049;
+        color: white;
+        outline: none;
+    }
+
+    div.stButton > button:active {
+        background-color: #45a049;
+        color: white;
+        outline: none;
     }
     </style>
     """,
@@ -30,12 +45,13 @@ API_URL = "http://web:8080/student"
 
 st.title("Student Record API Tester for OS")
 
+# Input fields for student data creation
 student_id = st.text_input("Student ID", value="12345")
 student_name = st.text_input("Student Name", value="John Doe")
 course = st.selectbox("Course", ["OS", "Math", "CS", "Physics"])
 present_date = st.date_input("Present Date", value=date.today())
 
-# POST request to simulate what's wanted in part 1 requirement doc
+# POST request to create a student record
 def create_student_record():
     # Add a delay to prevent Docker container issue
     time.sleep(5)  # Wait for 5 seconds just in case to prevent startup issues
@@ -60,9 +76,8 @@ def create_student_record():
         st.error(f"Error: {response.status_code}")
         st.text(response.text)
 
-#let's add a get as well so we can see our handy-work
+# GET request to retrieve all students
 def get_all_students():
-    
     response = requests.get(API_URL)
     
     if response.status_code == 200:
@@ -76,11 +91,7 @@ def get_all_students():
         st.error(f"Error: {response.status_code}")
         st.text(response.text)
 
-# for interacting with the post
-if st.markdown('<button class="success-btn">Create Student Record</button>', unsafe_allow_html=True):
-    create_student_record()
-
-# let's add another one to get a specific student by their id
+# GET request to retrieve a specific student by their ID
 def get_student_by_id(student_id):
     response = requests.get(f"{API_URL}/{student_id}")
     
@@ -92,15 +103,19 @@ def get_student_by_id(student_id):
         st.error(f"Error: {response.status_code}")
         st.text(response.text)
 
-# for interacting with the get
+# Button to create a new student record
+if st.button("Create Student Record"):
+    create_student_record()
+
+# Section for retrieving and displaying all students
 st.subheader("Retrieve All Existing Records")
-if st.markdown('<button class="success-btn">Get All Students</button>', unsafe_allow_html=True):
+if st.button("Get All Students"):
     get_all_students()
 
-# for interacting with the post to get a specific student
-st.subheader("Retrieve a single Student by ID")
+# Section for retrieving a specific student by their ID
+st.subheader("Retrieve a Single Student by ID")
 specific_student_id = st.text_input("Enter Student ID to Retrieve")
-if st.markdown('<button class="success-btn">Get Student by ID</button>', unsafe_allow_html=True):
+if st.button("Get Student by ID"):
     get_student_by_id(specific_student_id)
 
 st.write("Test to make sure we can't submit multiple of the same.")
