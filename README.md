@@ -2,7 +2,7 @@
 
 This project consists of a frontend with Streamlit to interact with the backend, which is a PostgreSQL database, both running in Docker containers.
 
-# This project was based on the FastAPI and python script I built for my capstone here: https://github.com/kksimons/python-scheduler
+This project was based on the FastAPI and python script I built for my capstone here: https://github.com/kksimons/python-scheduler
 
 ## Prerequisites
 
