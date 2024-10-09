@@ -1,6 +1,3 @@
--- Do not attempt to create the database if it already exists
-\c studentdb;
-
 -- Create the students table if it doesn't exist
 CREATE TABLE IF NOT EXISTS students (
     id SERIAL PRIMARY KEY,

@@ -43,8 +43,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# FastAPI URL
-API_URL = "http://web:8080/student"
+# FastAPI URL, have to change to localhost after putting all in one container
+API_URL = "http://localhost:8080/student"
 
 st.title("Student Record API Tester for OS")
 

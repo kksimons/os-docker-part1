@@ -1,45 +1,45 @@
-services:
-  db:
-    image: postgres:13
-    restart: always
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: studentdb
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./db-init:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U user -d studentdb" ]
-      interval: 10s
-      retries: 5
+# services:
+#   db:
+#     image: postgres:13
+#     restart: always
+#     environment:
+#       POSTGRES_USER: user
+#       POSTGRES_PASSWORD: password
+#       POSTGRES_DB: studentdb
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#       - ./db-init:/docker-entrypoint-initdb.d
+#     ports:
+#       - "5432:5432"
+#     healthcheck:
+#       test: [ "CMD-SHELL", "pg_isready -U user -d studentdb" ]
+#       interval: 10s
+#       retries: 5
 
-  web:
-    build: .
-    restart: always
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: postgresql://user:password@db/studentdb
-    ports:
-      - "8080:8080"
-    volumes:
-      - .:/app
-    command: [ "uvicorn", "app.app:app", "--host", "0.0.0.0", "--port", "8080", "--reload" ]
+#   web:
+#     build: .
+#     restart: always
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#     environment:
+#       DATABASE_URL: postgresql://user:password@db/studentdb
+#     ports:
+#       - "8080:8080"
+#     volumes:
+#       - .:/app
+#     command: [ "uvicorn", "app.app:app", "--host", "0.0.0.0", "--port", "8080", "--reload" ]
 
-  streamlit:
-    build: .
-    command: [ "streamlit", "run", "app/streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0" ]
-    ports:
-      - "8501:8501"
-    volumes:
-      - .:/app
-    depends_on:
-      - web
-      - db
+#   streamlit:
+#     build: .
+#     command: [ "streamlit", "run", "app/streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0" ]
+#     ports:
+#       - "8501:8501"
+#     volumes:
+#       - .:/app
+#     depends_on:
+#       - web
+#       - db
 
-volumes:
-  postgres_data:
+# volumes:
+#   postgres_data:
