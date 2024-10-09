@@ -1,3 +1,69 @@
+import streamlit as st
+import requests
+from datetime import date
+import time
+
+# FastAPI URL
+API_URL = "http://web:8080/student"
+
+st.title("Student Record API Tester for OS")
+
+student_id = st.text_input("Student ID", value="12345")
+student_name = st.text_input("Student Name", value="John Doe")
+course = st.selectbox("Course", ["OS", "Math", "CS", "Physics"])
+present_date = st.date_input("Present Date", value=date.today())
+
+# POST request to simulate what's wanted in part 1 requirement doc
+def create_student_record():
+    # Add a delay to prevent Docker container issue
+    time.sleep(5)  # Wait for 5 seconds just in case to prevent startup issues
+    
+    student_data = {
+        "studentID": student_id,
+        "studentName": student_name,
+        "course": course,
+        "presentDate": present_date.isoformat()
+    }
+    
+    # Send POST request
+    response = requests.post(API_URL, json=student_data)
+    
+    if response.status_code == 201:
+        st.success("Student created successfully!")
+        st.json(response.json())
+    elif response.status_code == 409:
+        st.warning("Student already exists!")
+        st.json(response.json())
+    else:
+        st.error(f"Error: {response.status_code}")
+        st.text(response.text)
+
+#let's add a get as well so we can see our handy-work
+def get_all_students():
+    
+    response = requests.get(API_URL)
+    
+    if response.status_code == 200:
+        students = response.json()
+        if len(students) > 0:
+            st.success("Fetched students successfully!")
+            st.json(students)  
+        else:
+            st.warning("No students found.")
+    else:
+        st.error(f"Error: {response.status_code}")
+        st.text(response.text)
+
+if st.button("Create Student Record"):
+    create_student_record()
+
+# Section for retrieving and displaying all students
+st.subheader("Retrieve Existing Records")
+if st.button("Get All Students"):
+    get_all_students()
+
+st.write("Test to make sure we can't submit multiple of the same.")
+
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String, Date, UniqueConstraint
@@ -14,7 +80,6 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-
 # Student model representing the student table in the database
 class Student(Base):
     __tablename__ = "students"
@@ -23,8 +88,7 @@ class Student(Base):
     studentname = Column(String)
     course = Column(String)
     presentdate = Column(Date, default=date.today)
-    UniqueConstraint("studentid", name="uix_1")  # Ensure studentid is unique
-
+    UniqueConstraint('studentid', name='uix_1')  # Ensure studentid is unique
 
 # Create the tables in the database
 Base.metadata.create_all(bind=engine)
@@ -32,14 +96,12 @@ Base.metadata.create_all(bind=engine)
 # FastAPI app initialization
 app = FastAPI()
 
-
 # Pydantic model for handling POST request input
 class StudentCreate(BaseModel):
     studentID: str
     studentName: str
     course: str
     presentDate: date = date.today()
-
 
 # Dependency to get the database session
 def get_db():
@@ -49,66 +111,46 @@ def get_db():
     finally:
         db.close()
 
-
 # POST endpoint to create a student record
 @app.post("/student", status_code=201)
 def create_student(student: StudentCreate, db: SessionLocal = Depends(get_db)):
+    # Check if student already exists by studentid
+    existing_student = db.query(Student).filter(Student.studentid == student.studentID).first()  # Lowercase 'studentid'
+    if existing_student:
+        raise HTTPException(status_code=409, detail="Student already exists")
+    
+    # Create new student record
+    new_student = Student(
+        studentid=student.studentID,  # Lowercase 'studentid'
+        studentname=student.studentName,  # Lowercase 'studentname'
+        course=student.course,
+        presentdate=student.presentDate  # Lowercase 'presentdate'
+    )
     try:
-        # Check if student already exists by studentid
-        existing_student = (
-            db.query(Student).filter(Student.studentid == student.studentID).first()
-        )
-        if existing_student:
-            raise HTTPException(status_code=409, detail="Student already exists")
-
-        # Create new student record, LOWERCASE for everything
-        new_student = Student(
-            studentid=student.studentID,
-            studentname=student.studentName,
-            course=student.course,
-            presentdate=student.presentDate,
-        )
         db.add(new_student)
         db.commit()
         db.refresh(new_student)
-        return {"message": "Student created successfully", "student": new_student}
-
     except IntegrityError:
-        db.rollback()  # Rollback in case of IntegrityError
         raise HTTPException(status_code=409, detail="Student already exists")
-
-    except SQLAlchemyError as e:
-        db.rollback()
-        raise HTTPException(
-            status_code=500, detail="Database error occurred"
-        )  # Handle generic SQLAlchemy error
-
-
-# add the get point for the streamlit
-@app.get("/student")
-def get_all_students(db: SessionLocal = Depends(get_db)):
-    try:
-        students = db.query(Student).all()
-        if not students:
-            raise HTTPException(status_code=404, detail="No students found")
-        return students
-
-    except SQLAlchemyError as e:
-        raise HTTPException(status_code=500, detail="Database error occurred")
-
+    
+    return {"message": "Student created successfully", "student": new_student}
 
 # GET endpoint to retrieve a specific student by student_id
 @app.get("/student/{student_id}")
 def read_student(student_id: str, db: SessionLocal = Depends(get_db)):
-    student = (
-        db.query(Student).filter(Student.studentid == student_id).first()
-    )  # Lowercase 'studentid'
+    student = db.query(Student).filter(Student.studentid == student_id).first()  # Lowercase 'studentid'
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
     return student
 
+# add the get point for the streamlit
+@app.get("/student")
+def get_all_students(db: SessionLocal = Depends(get_db)):
+    students = db.query(Student).all()
+    if not students:
+        raise HTTPException(status_code=404, detail="No students found")
+    return students
 
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app="app:app", host="0.0.0.0", port=8080, reload=True)
