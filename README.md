@@ -1,69 +1,49 @@
-# This is for Part 1 of the Docker Assignment at SAIT for OS
+# Part 1 of the Docker Assignment at SAIT for OS
 
-This project consists of a frontend with Streamlit to interact with the backend, which is a PostgreSQL database, both running in Docker containers.
+This project consists of a frontend with Streamlit and a backend with FastAPI, connected to a PostgreSQL database, all running within a single Docker container.
 
-This project was based on the FastAPI and python script I built for my capstone here: https://github.com/kksimons/python-scheduler
+This project is based on the FastAPI and Python script developed for my capstone, which you can find [here](https://github.com/kksimons/python-scheduler).
 
 ## Prerequisites
 
 Before you start, make sure you have Docker installed on your machine. You can follow instructions to install Docker from [here](https://docs.docker.com/get-docker/).
 
-## Pull Docker Images
+## Pull Docker Image
 
-To get started, you can pull the pre-built Docker images for the backend (FastAPI) and frontend (Streamlit) from Docker Hub:
+To get started, pull the pre-built Docker image that contains both the backend (FastAPI) and frontend (Streamlit):
 
-1. **Pull the FastAPI Backend Image:**
+1. **Pull the Combined Docker Image:**
     ```bash
-    docker pull kksimons/os-docker-part1-web:latest
+    docker pull kksimons/os-docker-part1-combined:latest
     ```
 
-2. **Pull the Streamlit Frontend Image:**
+## Running the Container
+
+### Step 1: Run the Combined Container
+
+1. Use the following command to run the combined container:
     ```bash
-    docker pull kksimons/os-docker-part1-streamlit:latest
+    docker run -p 5438:5432 -p 8082:8080 -p 8508:8501 kksimons/os-docker-part1-combined:latest
     ```
+   - The above command maps the container's ports to the host machine, I use different ports because of multiple instances of other things, feel free to change mappings to match your needs
+     - PostgreSQL is accessible on `localhost:5438`
+     - FastAPI is accessible on `localhost:8082`
+     - Streamlit is accessible on `localhost:8508`
+     
+2. The FastAPI app should be running and accessible at `http://localhost:8082` if you want to use postman, while the Streamlit app frontend interface can be found at `http://localhost:8508`.
 
-## Running the Containers
+### Step 2: Accessing the Applications
 
-### Step 1: Run the Backend (FastAPI)
-
-1. To run the backend, use this command:
-    ```bash
-    docker run -d kksimons/os-docker-part1-web:latest
-    ```
-   - `-d` runs the container in detached mode so you can keep it running in the background.
-   
-2. The FastAPI app should now be running and accessible at `http://localhost:8080` via Postman.
-
-### Step 2: Run the Frontend (Streamlit)
-
-1. After the backend is running, start the Streamlit frontend using this command:
-    ```bash
-    docker run kksimons/os-docker-part1-streamlit:latest
-    ```
-   - This command runs the Streamlit app in the foreground, so you'll see logs and outputs, including POST/GET request logs.
-   
-2. The Streamlit app should now be accessible at `http://localhost:8501`. You must be running the backend first in order to interaact with it properly.
-
-### Step 3: Accessing the Applications
-
-- **Backend (FastAPI)**: 
-   - If you want to interact with the backend directly, you can use tools like **Postman** or **curl**. 
+- **Backend (FastAPI)**:
+   - You can interact with the backend directly using tools like **Postman** or **curl**.
    - Example using `curl` to create a new student:
      ```bash
-     curl -X POST "http://localhost:8080/student" -H "Content-Type: application/json" -d '{
+     curl -X POST "http://localhost:8082/student" -H "Content-Type: application/json" -d '{
          "studentID": "12345",
          "studentName": "John Doe",
          "course": "OS",
          "presentDate": "2024-10-03"
      }'
      ```
-   - You can also use `http://localhost:8080` to interact with the FastAPI backend directly from the browser (for example, to view API documentation or access endpoints).
 
-- **Frontend (Streamlit)**: Open your browser and navigate to `http://localhost:8501` to use the Streamlit app, which provides a user interface to interact with the backend.
-
-### Step 4: Stopping Containers
-
-If you want to stop both the backend and frontend containers after you've finished working, you can stop all running containers using this single command:
-
-```bash
-docker stop $(docker ps -q)
+- **Frontend (Streamlit)**: Open your browser and go to `http://localhost:8508` to use the Streamlit app, which provides a user interface to interact with the backend.
