@@ -4,6 +4,8 @@ This project consists of a frontend with Streamlit and a backend with FastAPI, c
 
 This project is based on the FastAPI and Python script developed for my capstone, which you can find [here](https://github.com/kksimons/python-scheduler).
 
+Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": which you can find [here](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
+
 ## Prerequisites
 
 Before you start, make sure you have Docker installed on your machine. You can follow instructions to install Docker from [here](https://docs.docker.com/get-docker/).
