@@ -40,7 +40,7 @@ st.markdown(
     }
     </style>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 # FastAPI URL, have to change to localhost after putting all in one container
@@ -54,21 +54,22 @@ student_name = st.text_input("Student Name", value="John Doe")
 course = st.selectbox("Course", ["OS", "Math", "CS", "Physics"])
 present_date = st.date_input("Present Date", value=date.today())
 
+
 # POST request to create a student record
 def create_student_record():
     # Add a delay to prevent Docker container issue
     time.sleep(5)  # Wait for 5 seconds just in case to prevent startup issues
-    
+
     student_data = {
         "studentID": student_id,
         "studentName": student_name,
         "course": course,
-        "presentDate": present_date.isoformat()
+        "presentDate": present_date.isoformat(),
     }
-    
+
     # POST request for adding a student
     response = requests.post(API_URL, json=student_data)
-    
+
     if response.status_code == 201:
         st.success("Student created successfully!")
         st.json(response.json())
@@ -79,26 +80,27 @@ def create_student_record():
         st.error(f"Error: {response.status_code}")
         st.text(response.text)
 
+
 # GET request to retrieve all students
 def get_all_students():
     response = requests.get(API_URL)
-    
+
     if response.status_code == 200:
         students = response.json()
         if len(students) > 0:
             st.success("Fetched students successfully!")
-            st.json(students)  
+            st.json(students)
         else:
             st.warning("No students found.")
     else:
         st.error(f"Error: {response.status_code}")
         st.text(response.text)
-        
+
 
 # GET request to retrieve a specific student by their ID
 def get_student_by_id(student_id):
     response = requests.get(f"{API_URL}/{student_id}")
-    
+
     if response.status_code == 200:
         student = response.json()
         st.success(f"Student with ID {student_id} found!")
@@ -106,6 +108,7 @@ def get_student_by_id(student_id):
     else:
         st.error(f"Error: {response.status_code}")
         st.text(response.text)
+
 
 # Button to create a new student record
 if st.button("Create Student Record"):
@@ -125,10 +128,17 @@ if st.button("Get Student by ID"):
 # Put Endpoint for Part 2
 st.subheader("Update Existing Student Record")
 
-pdate_student_id = st.text_input("Enter Student ID to Update", key="update_id")
-update_student_name = st.text_input("Updated Student Name", value="John Doe", key="update_name")
-update_course = st.selectbox("Updated Course", ["OS", "Math", "CS", "Physics"], key="update_course")
-update_present_date = st.date_input("Updated Present Date", value=date.today(), key="update_date")
+update_student_id = st.text_input("Enter Student ID to Update", key="update_id")
+update_student_name = st.text_input(
+    "Updated Student Name", value="John Doe", key="update_name"
+)
+update_course = st.selectbox(
+    "Updated Course", ["OS", "Math", "CS", "Physics"], key="update_course"
+)
+update_present_date = st.date_input(
+    "Updated Present Date", value=date.today(), key="update_date"
+)
+
 
 # PUT request to update a student record
 def update_student_record():
@@ -136,12 +146,12 @@ def update_student_record():
         "studentID": update_student_id,
         "studentName": update_student_name,
         "course": update_course,
-        "presentDate": update_present_date.isoformat()
+        "presentDate": update_present_date.isoformat(),
     }
-    
+
     # Send PUT request
     response = requests.put(f"{API_URL}/{update_student_id}", json=student_data)
-    
+
     if response.status_code == 200:
         st.success("Student updated successfully!")
         st.json(response.json())
@@ -151,6 +161,7 @@ def update_student_record():
     else:
         st.error(f"Error: {response.status_code}")
         st.text(response.text)
+
 
 if st.button("Update Student Record"):
     update_student_record()
