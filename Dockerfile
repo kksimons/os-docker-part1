@@ -2,7 +2,8 @@
 FROM python:3.9-slim
 
 # Install PostgreSQL
-RUN apt-get update && apt-get install -y postgresql postgresql-contrib && \
+# had to add dos2unix for some reason for this part 2 only to run entrypoint...
+RUN apt-get update && apt-get install -y postgresql postgresql-contrib dos2unix && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables for PostgreSQL
@@ -29,6 +30,11 @@ RUN mkdir -p /var/lib/postgresql/data /run/postgresql && \
 
 # Copy entrypoint script and make it executable
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+
+# Convert line endings of entrypoint.sh to Unix format
+RUN dos2unix /usr/local/bin/entrypoint.sh
+
+# Make entrypoint script executable
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Expose the ports for PostgreSQL, FastAPI, and Streamlit

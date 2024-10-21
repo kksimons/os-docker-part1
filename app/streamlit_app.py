@@ -93,6 +93,7 @@ def get_all_students():
     else:
         st.error(f"Error: {response.status_code}")
         st.text(response.text)
+        
 
 # GET request to retrieve a specific student by their ID
 def get_student_by_id(student_id):
@@ -120,5 +121,38 @@ st.subheader("Retrieve a Single Student by ID")
 specific_student_id = st.text_input("Enter Student ID to Retrieve")
 if st.button("Get Student by ID"):
     get_student_by_id(specific_student_id)
+
+# Put Endpoint for Part 2
+st.subheader("Update Existing Student Record")
+
+pdate_student_id = st.text_input("Enter Student ID to Update", key="update_id")
+update_student_name = st.text_input("Updated Student Name", value="John Doe", key="update_name")
+update_course = st.selectbox("Updated Course", ["OS", "Math", "CS", "Physics"], key="update_course")
+update_present_date = st.date_input("Updated Present Date", value=date.today(), key="update_date")
+
+# PUT request to update a student record
+def update_student_record():
+    student_data = {
+        "studentID": update_student_id,
+        "studentName": update_student_name,
+        "course": update_course,
+        "presentDate": update_present_date.isoformat()
+    }
+    
+    # Send PUT request
+    response = requests.put(f"{API_URL}/{update_student_id}", json=student_data)
+    
+    if response.status_code == 200:
+        st.success("Student updated successfully!")
+        st.json(response.json())
+    elif response.status_code == 404:
+        st.warning("No student with that ID found")
+        st.json(response.json())
+    else:
+        st.error(f"Error: {response.status_code}")
+        st.text(response.text)
+
+if st.button("Update Student Record"):
+    update_student_record()
 
 st.write("Test to make sure we can't submit multiple of the same.")

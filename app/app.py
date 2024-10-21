@@ -142,7 +142,7 @@ def read_student(student_id: str, db: SessionLocal = Depends(get_db)):
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
     return student
-
+\
 # add the get point for the streamlit
 @app.get("/student")
 def get_all_students(db: SessionLocal = Depends(get_db)):
@@ -150,6 +150,25 @@ def get_all_students(db: SessionLocal = Depends(get_db)):
     if not students:
         raise HTTPException(status_code=404, detail="No students found")
     return students
+
+# Part 2: PUT endpoint to update a student record. 
+@app.put("/student/{student_id}", status_code=200)
+def update_student(student_id: str, student: StudentCreate, db: SessionLocal = Depends(get_db)):
+    # Check if student exists
+    existing_student = db.query(Student).filter(Student.studentid == student_id).first()
+    if not existing_student:
+        raise HTTPException(status_code=404, detail="No student found with that ID")
+    
+    # Update the student record
+    existing_student.studentname = student.studentName
+    existing_student.course = student.course
+    existing_student.presentdate = student.presentDate
+    
+    db.commit()
+    db.refresh(existing_student)
+    
+    return {"message": "Student record updated successfully", "student": existing_student}
+
 
 if __name__ == "__main__":
     import uvicorn
