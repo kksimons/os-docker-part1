@@ -166,4 +166,24 @@ def update_student_record():
 if st.button("Update Student Record"):
     update_student_record()
 
+# DELETE request to remove a student record by student_id
+def delete_student_record(student_id):
+    response = requests.delete(f"{API_URL}/{student_id}")
+    
+    if response.status_code == 200:
+        st.success("Student deleted successfully!")
+        st.json(response.json())
+    elif response.status_code == 404:
+        st.warning("No student with that ID found.")
+        st.json(response.json())
+    else:
+        st.error(f"Error: {response.status_code}")
+        st.text(response.text)
+
+# Section for deleting a student record by their ID
+st.subheader("Delete Student Record")
+delete_student_id = st.text_input("Enter Student ID to Delete", key="delete_id")
+if st.button("Delete Student Record"):
+    delete_student_record(delete_student_id)
+
 st.write("Test to make sure we can't submit multiple of the same.")

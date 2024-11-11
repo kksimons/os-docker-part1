@@ -169,6 +169,20 @@ def update_student(student_id: str, student: StudentCreate, db: SessionLocal = D
     
     return {"message": "Student record updated successfully", "student": existing_student}
 
+# Part 3: DELETE endpoint to delete a student record by student_id
+@app.delete("/student/{student_id}", status_code=200)
+def delete_student(student_id: str, db: SessionLocal = Depends(get_db)):
+    # Check if student exists
+    student = db.query(Student).filter(Student.studentid == student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    # Delete the student record
+    db.delete(student)
+    db.commit()
+    
+    return {"message": "Student deleted successfully"}
+
 
 if __name__ == "__main__":
     import uvicorn
