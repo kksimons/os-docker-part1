@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y postgresql postgresql-contrib dos2unix 
 # Set environment variables for PostgreSQL
 ENV POSTGRES_USER=user
 ENV POSTGRES_PASSWORD=password
-ENV POSTGRES_DB=studentdb
+ENV POSTGRES_DB=StudentDB
 ENV PATH="/usr/lib/postgresql/13/bin:$PATH"
 
 # Set working directory
