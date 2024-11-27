@@ -73,7 +73,7 @@ from sqlalchemy.exc import IntegrityError
 from datetime import date
 
 # Database URL for PostgreSQL would move this into an .env in the future (localhost because all in one container now)
-DATABASE_URL = "postgresql://user:password@localhost/studentdb"
+DATABASE_URL = "postgresql://user:password@localhost/StudentDB"
 
 # Set up SQLAlchemy to interact with the database
 engine = create_engine(DATABASE_URL)
