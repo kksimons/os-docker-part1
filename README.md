@@ -16,7 +16,7 @@ To get started, pull the pre-built Docker image that contains both the backend (
 
 1. **Pull the Combined Docker Image:**
     ```bash
-    docker pull kksimons/osdocker-part4-combined:latest
+    docker pull kksimons/studentrestfulapi:latest
     ```
 
 ## Running the Container
@@ -25,7 +25,7 @@ To get started, pull the pre-built Docker image that contains both the backend (
 
 1. Use the following command to run the combined container:
     ```bash
-    docker run -p 5438:5432 -p 8082:8080 -p 8508:8501 kksimons/osdocker-part4-combined:latest
+    docker run -p 5438:5432 -p 8082:8080 -p 8508:8501 kksimons/studentrestfulapi:latest
     ```
    - The above command maps the container's ports to the host machine, I use different ports because of multiple instances of other things, feel free to change mappings to match your needs
      - PostgreSQL is accessible on `localhost:5438`
