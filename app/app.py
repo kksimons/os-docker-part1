@@ -3,6 +3,55 @@ import requests
 from datetime import date
 import time
 
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jwt.exceptions import InvalidTokenError
+from passlib.context import CryptContext
+from datetime import datetime, timedelta
+import jwt
+
+# FastAPI app initialization
+app = FastAPI()
+
+SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+
+# Create JWT Token
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+# Decode JWT Token
+def verify_token(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+# for some reason needs this redeclared here?
+from pydantic import BaseModel
+class LoginData(BaseModel):
+    username: str
+    password: str
+
+@app.post("/login")
+def login(user: LoginData):
+    # Replace with actual user verification
+    if user.username == "test" and user.password == "password":
+        token_data = {"sub": user.username}
+        token = create_access_token(token_data)
+        return {"access_token": token, "token_type": "bearer"}
+    else:
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+    
 # FastAPI URL
 API_URL = "http://web:8080/student"
 
@@ -64,7 +113,6 @@ if st.button("Get All Students"):
 
 st.write("Test to make sure we can't submit multiple of the same.")
 
-from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String, Date, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
@@ -92,9 +140,6 @@ class Student(Base):
 
 # Create the tables in the database
 Base.metadata.create_all(bind=engine)
-
-# FastAPI app initialization
-app = FastAPI()
 
 # Pydantic model for handling POST request input
 class StudentCreate(BaseModel):
@@ -136,16 +181,16 @@ def create_student(student: StudentCreate, db: SessionLocal = Depends(get_db)):
     return {"message": "Student created successfully", "student": new_student}
 
 # GET endpoint to retrieve a specific student by student_id
-@app.get("/student/{student_id}")
-def read_student(student_id: str, db: SessionLocal = Depends(get_db)):
-    student = db.query(Student).filter(Student.studentid == student_id).first()  # Lowercase 'studentid'
-    if not student:
-        raise HTTPException(status_code=404, detail="Student not found")
-    return student
-\
-# add the get point for the streamlit
+# Adding the protected route to test our the JWT implementation
 @app.get("/student")
-def get_all_students(db: SessionLocal = Depends(get_db)):
+def get_all_students(
+    db: SessionLocal = Depends(get_db),
+    token: str = Depends(oauth2_scheme)  # Extract token using OAuth2PasswordBearer
+):
+    # Verify the token
+    payload = verify_token(token)  # This ensures the token is valid
+    
+    # Proceed with fetching the students if the token is valid
     students = db.query(Student).all()
     if not students:
         raise HTTPException(status_code=404, detail="No students found")

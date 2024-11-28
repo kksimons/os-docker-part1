@@ -46,6 +46,23 @@ st.markdown(
 # FastAPI URL, have to change to localhost after putting all in one container
 API_URL = "http://localhost:8080/student"
 
+# Now need to login for JWT token, only get all will be tested with it for now
+def login_user(username, password):
+    response = requests.post("http://localhost:8080/login", json={"username": username, "password": password})
+    if response.status_code == 200:
+        token_data = response.json()
+        st.session_state["token"] = token_data["access_token"]
+        st.success("Logged in successfully!")
+    else:
+        st.error(f"Error: {response.status_code} - {response.text}")
+
+# Example login form
+username = st.text_input("Username")
+password = st.text_input("Password", type="password")
+if st.button("Log in"):
+    login_user(username, password)
+
+
 st.title("Student Record API Tester for OS")
 
 # Input fields for student data creation
@@ -83,8 +100,16 @@ def create_student_record():
 
 # GET request to retrieve all students
 def get_all_students():
-    response = requests.get(API_URL)
-
+    if "token" not in st.session_state:
+        st.warning("You need to log in first!")
+        return
+    
+    headers = {
+        "Authorization": f"Bearer {st.session_state['token']}"
+    }
+    
+    response = requests.get(API_URL, headers=headers)
+    
     if response.status_code == 200:
         students = response.json()
         if len(students) > 0:
