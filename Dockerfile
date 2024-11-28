@@ -1,6 +1,9 @@
 # Use Python base image
 FROM python:3.9-slim
 
+# Adding image label name for Docker Part 4 Requirements
+LABEL image-name="StudentRestfulAPI"
+
 # Install PostgreSQL
 # had to add dos2unix for some reason for this part 2 only to run entrypoint...
 RUN apt-get update && apt-get install -y postgresql postgresql-contrib dos2unix && \
